@@ -1,0 +1,208 @@
+project_name: Nengo
+pkg_name: nengo
+repo_name: nengo/nengo
+description: Tools for building and simulating large-scale neural models
+
+copyright_start: 2013
+
+license_rst: {}
+
+contributing_rst: {}
+
+contributors_rst: {}
+
+manifest_in:
+  graft:
+    - nengo-data
+  recursive-include:
+    - nengo *.rst
+    - nengo *.txt
+
+setup_py:
+  package_data:
+    nengo:
+      - nengo-data/nengorc
+  py_modules:
+    - pytest_nengo
+  entry_points:
+    nengo.backends:
+      - reference = nengo:Simulator
+    pytest11:
+      - nengo = pytest_nengo
+  install_req:
+    - numpy>=1.11
+  docs_req:
+    - sphinx>=1.8
+    - jupyter
+    - matplotlib>=1.4
+    - nbsphinx
+    - numpydoc>=0.6
+    - nengo_sphinx_theme>=0.12.0
+  optional_req:
+    - scipy>=0.13
+    - scikit-learn
+  tests_req:
+    - jupyter
+    - matplotlib>=1.4
+    - pytest>=3.6
+    - pytest-allclose
+    - pytest-plt
+    - pytest-rng
+  classifiers:
+    - "Development Status :: 5 - Production/Stable"
+    - "Framework :: Nengo"
+    - "Intended Audience :: Science/Research"
+    - "License :: Free for non-commercial use"
+    - "Operating System :: OS Independent"
+    - "Programming Language :: Python :: 3 :: Only"
+    - "Programming Language :: Python :: 3.5"
+    - "Programming Language :: Python :: 3.6"
+    - "Programming Language :: Python :: 3.7"
+    - "Topic :: Scientific/Engineering :: Artificial Intelligence"
+
+setup_cfg:
+  coverage:
+    omit_files:
+      - "nengo/_vendor/*"
+      - "nengo/spa/*"
+  flake8:
+    exclude:
+      - compat.py
+      - nengo/_vendor
+  pytest:
+    norecursedirs:
+      - "plots"
+      - "nengo/_vendor"
+    filterwarnings:
+      - always
+      - "ignore::ImportWarning"
+      - "ignore:(Buffer|Memory|The nengo\\.spa):DeprecationWarning"
+      - "ignore:Skipping some optimization steps"
+      - "ignore:SciPy is not installed"
+      - "ignore:numpy.(dtype|ufunc) size changed"
+      - "ignore:Object <BasalGanglia \"bg\"> has already been built"
+      - "ignore:Object <Thalamus \"thalamus\"> has already been built"
+      - "ignore:IPython.core.inputsplitter is deprecated"
+    markers:
+      example:
+        Mark a test as an example.
+      slow:
+        Mark a test as slow to skip it per default.
+    plt_filename_drop:
+      - ^nengo\.
+      - tests\.
+  pylint:
+    ignore:
+      - _vendor
+      - compat.py
+      - nengo/spa
+    disable:
+      # TODO: fix these and start checking for them
+      - abstract-method
+      - bad-continuation
+      - bad-string-format-type
+      - broad-except
+      - not-callable
+      - chained-comparison
+      - consider-iterating-dictionary
+      - consider-merging-isinstance
+      - consider-using-in
+      - cyclic-import
+      - eval-used
+      - exec-used
+      - expression-not-assigned
+      - global-statement
+      - inconsistent-return-statements
+      - invalid-unary-operand-type
+      - keyword-arg-before-vararg
+      - logging-format-interpolation
+      - missing-docstring
+      - nonexistent-operator
+      - pointless-statement
+      - redefined-argument-from-local
+      - redefined-outer-name
+      - reimported
+      - single-string-used-for-slots
+      - superfluous-parens
+      - too-many-ancestors
+      - trailing-comma-tuple
+      - undefined-loop-variable
+      - unexpected-special-method-signature
+      - unnecessary-pass
+      - unused-variable
+    known_third_party:
+      - mpl_toolkits
+      - pytest_allclose
+
+docs_conf_py:
+  intersphinx_mapping:
+    scipy: 'https://docs.scipy.org/doc/scipy/reference'
+    sklearn: 'https://scikit-learn.org/dev'
+  analytics_id: UA-41658423-2
+  extensions:
+    - nengo_sphinx_theme.ext.resolvedefaults
+    - sphinx.ext.inheritance_diagram
+
+travis_yml:
+  python: 3.6
+  global_vars:
+    NUMPY: numpy
+  jobs:
+    - stage: basic
+      script: static
+    - script: test-coverage-scipy
+      test_args: --memory --plots
+    - script: test-coverage
+      test_args: --plots
+      python: 3.5
+    - stage: advanced
+      script: docs
+      apt_install:
+        - graphviz
+        - pandoc
+    - env:
+        NUMPY: numpy==1.11
+      cache: false  # disable the cache for one build to make sure that works
+    - env:
+        NUMPY: numpy==1.12
+    - env:
+        NUMPY: numpy==1.13
+    - env:
+        NUMPY: numpy==1.14
+    - env:
+        NUMPY: numpy==1.15
+    - dist: xenial
+      python: 3.7
+
+ci_scripts:
+  - template: static
+  - template: test
+    pip_install:
+      - $NUMPY
+  - template: test
+    output_name: test-coverage
+    pip_install:
+      - $NUMPY
+    coverage: true
+  - template: test
+    output_name: test-coverage-scipy
+    pip_install:
+      - $NUMPY
+      - scipy
+      - scikit-learn
+    coverage: true
+  - template: docs
+    pip_install:
+      - $NUMPY
+      - scipy
+      - matplotlib
+
+codecov_yml: {}
+
+pre_commit_config_yaml:
+  exclude:
+    - "_vendor/*"
+
+pyproject_toml:
+  exclude:
+    - "_vendor/*"
